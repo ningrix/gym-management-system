@@ -8,6 +8,7 @@
 
 ## 目录
 
+- [界面预览](#界面预览)
 - [功能](#功能)
 - [技术栈](#技术栈)
 - [快速开始](#快速开始)
@@ -19,6 +20,30 @@
 - [更新日志](#更新日志)
 - [已知限制](#已知限制)
 - [素材授权](#素材授权)
+
+---
+
+## 界面预览
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/02-admin-dashboard.jpg" width="100%" alt="管理端工作台"><br><sub><b>管理端 · 工作台</b>　今日到店、营收、会员增长与课程热度</sub></td>
+    <td width="50%"><img src="docs/screenshots/03-admin-reports.jpg" width="100%" alt="统计报表"><br><sub><b>管理端 · 统计报表</b>　会员增长、卡营收、课程热度、教练课时</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/06-admin-schedule.jpg" width="100%" alt="排课管理"><br><sub><b>管理端 · 排课管理</b>　按周排课、预约情况与开课状态</sub></td>
+    <td width="50%"><img src="docs/screenshots/04-member-center.jpg" width="100%" alt="会员个人中心"><br><sub><b>会员端 · 个人中心</b>　会员卡、缴费、体测趋势与我的预约</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/screenshots/05-exercise-library.jpg" width="100%" alt="动作库内嵌"><br><sub><b>会员端 · 动作库</b>　1,324 个动作，iframe 内嵌在主页面里，不跳转、不打断登录态；左侧是主系统菜单，中间是动作库的搜索与筛选，右侧是动作卡片</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/07-coach-home.jpg" width="100%" alt="教练端今日概览"><br><sub><b>教练端 · 今日概览</b>　今日课程、预约人数与课时结算</sub></td>
+    <td width="50%"><img src="docs/screenshots/01-login.jpg" width="100%" alt="登录页"><br><sub><b>登录页</b>　按角色隔离会话，可多角色同时在线</sub></td>
+  </tr>
+</table>
+
+> 截图中的会员与教练为内置演示数据（`member01` / `coach01`），不是真实用户信息。
 
 ---
 
@@ -176,6 +201,7 @@ spring:
 │   ├── videos/                     动作动图（未入库，见下文）
 │   └── LICENSE / NOTICE.md         素材授权
 ├── deploy/nginx-exercises.conf     Nginx 托管动作库的示例配置
+├── docs/screenshots/               README 用的界面截图
 ├── 调研/                           竞品调研、验收报告、动作库集成说明
 ├── index.html                      项目介绍落地页
 └── 启动健身房系统.cmd
