@@ -1,0 +1,6 @@
+# 论文复现用数据集（8 会员 / 3 教练 / 6 课程 / 15 排课 / 39 预约），静态日期 2026-10-26
+# 启动：--spring.profiles.active=thesis
+spring:
+  sql:
+    init:
+      data-locations: classpath:db/data-thesis.sql

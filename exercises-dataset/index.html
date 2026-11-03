@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>动作库 · 健身动作演示</title>
+  <style>
+    /* ── Reset ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button { font: inherit; cursor: pointer; border: none; background: none; }
+    img { display: block; max-width: 100%; }
+    input { font: inherit; }
+    ol, ul { list-style: none; }
+    summary { list-style: none; cursor: pointer; }
+    summary::-webkit-details-marker { display: none; }
+
+    /* ── Design Tokens ──────────────────────────────── */
+    :root {
+      --bg-base:        #f4f4f5;
+      --bg-surface:     #ffffff;
+      --bg-elevated:    #f0f0f1;
+      --bg-input:       #f4f4f5;
+      --border:         #e4e4e7;
+      --border-hover:   #c4c4c7;
+      --accent:         #ff4f00;
+      --accent-muted:   rgba(255, 79, 0, 0.08);
+      --text-primary:   #111111;
+      --text-secondary: #71717a;
+      --text-tertiary:  #a1a1aa;
+      --radius-sm:      6px;
+      --radius-md:      10px;
+      --radius-lg:      14px;
+      --radius-xl:      18px;
+      --sidebar-w:      260px;
+    }
+
+    /* ── Base ───────────────────────────────────────── */
+    html, body { height: 100%; }
+    body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Scrollbar ──────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+
+    /* ── App Shell ──────────────────────────────────── */
+    .app-shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ────────────────────────────────────── */
+    .sidebar {
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg-surface);
+      z-index: 1;
+    }
+
+    .sidebar-logo {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+    }
+
+    .sidebar-logo span {
+      color: var(--accent);
+    }
+
+    .sidebar-body {
+      padding: 12px 12px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* ── Search ─────────────────────────────────────── */
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+      pointer-events: none;
+      width: 14px;
+      height: 14px;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 8px 32px 8px 32px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-box::placeholder { color: var(--text-tertiary); }
+    .search-box:focus { border-color: var(--accent); }
+
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+      font-size: 16px;
+      line-height: 1;
+      display: none;
+      padding: 2px 4px;
+    }
+
+    .search-clear:hover { color: var(--text-primary); }
+    .search-clear.visible { display: block; }
+
+    /* ── Filter Sections ────────────────────────────── */
+    .filter-section {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .filter-summary {
+      display: flex;
+      align-items: center;
+      padding: 8px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      user-select: none;
+    }
+
+    .filter-options {
+      padding: 4px 2px 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .filter-show-more {
+      font-size: 11px;
+      color: var(--text-secondary);
+      padding: 3px 6px;
+      border-radius: 20px;
+      border: 1px dashed var(--border-hover);
+      transition: all 0.1s;
+    }
+
+    .filter-show-more:hover {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+    }
+
+    /* ── Chips ──────────────────────────────────────── */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      transition: all 0.1s;
+      white-space: nowrap;
+      text-transform: capitalize;
+    }
+
+    .chip:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+    }
+
+    .chip.active {
+      background: var(--accent-muted);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Main Content ───────────────────────────────── */
+    .main-content {
+      overflow-y: auto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Results Bar ────────────────────────────────── */
+    .results-bar {
+      padding: 14px 20px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      background: var(--bg-base);
+      z-index: 2;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .results-count {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-right: auto;
+    }
+
+    .active-filters {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .active-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px 3px 10px;
+      background: var(--accent-muted);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+
+    .active-badge-remove {
+      font-size: 13px;
+      line-height: 1;
+      color: var(--accent);
+      opacity: 0.7;
+      transition: opacity 0.1s;
+    }
+
+    .active-badge-remove:hover { opacity: 1; }
+
+    .clear-all {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .clear-all:hover { color: var(--text-primary); }
+
+    /* ── Exercise Grid ──────────────────────────────── */
+    .grid-wrapper {
+      padding: 16px 20px 32px;
+      flex: 1;
+    }
+
+    .exercise-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 14px;
+    }
+
+    /* ── Skeleton ───────────────────────────────────── */
+    .skeleton-card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-media {
+      aspect-ratio: 3/4;
+      background: var(--bg-elevated);
+    }
+
+    .skeleton-body { padding: 10px 12px 12px; }
+
+    .skeleton-line {
+      height: 10px;
+      border-radius: 5px;
+      background: var(--bg-elevated);
+      margin-bottom: 7px;
+    }
+
+    .skeleton-line.short { width: 60%; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ── Exercise Card ──────────────────────────────── */
+    .exercise-card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .exercise-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .card-media {
+      aspect-ratio: 3/4;
+      background: var(--bg-elevated);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-thumb,
+    .card-gif {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.2s;
+    }
+
+    .card-gif { opacity: 0; }
+    .exercise-card:hover .card-thumb { opacity: 0; }
+    .exercise-card:hover .card-gif { opacity: 1; }
+
+    .card-body {
+      padding: 9px 11px 11px;
+    }
+
+    .card-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+      text-transform: capitalize;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: capitalize;
+      letter-spacing: 0.01em;
+    }
+
+    .tag-cat  { background: rgba(59, 130, 246, 0.12); color: #60a5fa; }
+    .tag-equip { background: rgba(34, 197, 94, 0.10); color: #4ade80; }
+
+    /* ── Load Sentinel ──────────────────────────────── */
+    .load-sentinel {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .load-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .load-spinner.visible { display: block; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Empty State ────────────────────────────────── */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state p:first-child {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    /* ── Modal ──────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      width: min(660px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      transform: translateY(10px) scale(0.98);
+      transition: transform 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-overlay.open .modal-panel {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg-surface);
+      z-index: 1;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-transform: capitalize;
+    }
+
+    .modal-close {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.1s;
+      margin-top: 2px;
+    }
+
+    .modal-close:hover {
+      background: var(--accent-muted);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .modal-media {
+      padding: 14px 18px 0;
+    }
+
+    .modal-gif {
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+    }
+
+    .modal-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 14px 18px 0;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      flex-direction: column;
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      gap: 1px;
+    }
+
+    .meta-chip-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-tertiary);
+    }
+
+    .meta-chip-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: capitalize;
+    }
+
+    .modal-muscles {
+      padding: 14px 18px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-muscles-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      margin-bottom: 10px;
+    }
+
+    .muscles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .muscles-group {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+
+    .muscles-group-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-tertiary);
+      margin-bottom: 7px;
+    }
+
+    .muscle-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .muscle-tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 5px;
+      text-transform: capitalize;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .muscle-tag.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .modal-instructions {
+      padding: 0 18px 22px;
+    }
+
+    .modal-instructions-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      padding: 14px 0 0;
+      display: block;
+    }
+
+    .lang-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin: 10px 0 14px;
+    }
+
+    .lang-tab {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 24px;
+      border: none;
+      background: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.15s;
+      letter-spacing: 0.01em;
+    }
+
+    .lang-tab:hover { color: var(--text-secondary); }
+
+    .lang-tab.active { color: var(--text-primary); font-weight: 600; }
+
+    .lang-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .instructions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      counter-reset: steps;
+    }
+
+    .instruction-step {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      counter-increment: steps;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .step-text {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    /* ── Responsive ─────────────────────────────────── */
+    @media (max-width: 768px) {
+      /* Layout */
+      .app-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: 100dvh;
+      }
+
+      /* Sidebar → top panel */
+      .sidebar {
+        height: auto;
+        max-height: 45vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        overflow-y: auto;
+      }
+
+      .sidebar-header {
+        padding: 14px 14px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .sidebar-body {
+        padding: 10px 12px 16px;
+        gap: 10px;
+      }
+
+      .search-wrapper { margin-bottom: 4px; }
+
+      .filter-section { width: 100%; }
+
+      .filter-options {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+      }
+      .filter-options::-webkit-scrollbar { display: none; }
+
+      /* Main */
+      .main-content { height: auto; flex: 1; overflow-y: auto; }
+
+      .results-bar { padding: 10px 14px 8px; }
+
+      .grid-wrapper { padding: 12px 12px 28px; }
+
+      .exercise-grid {
+        grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+        gap: 10px;
+      }
+
+      /* Modal → bottom sheet */
+      .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+      }
+
+      .modal-panel {
+        width: 100%;
+        max-height: 92dvh;
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        border-bottom: none;
+      }
+
+      .modal-gif { max-height: 240px; }
+
+      /* Muscles grid → single col on small */
+      .muscles-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .exercise-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .grid-wrapper { padding: 10px 10px 24px; }
+
+      .modal-panel { max-height: 95dvh; }
+
+      .modal-header { padding: 16px 16px 12px; }
+      .modal-media  { padding: 12px 16px 0; }
+      .modal-meta   { padding: 12px 16px 0; }
+      .modal-muscles      { padding: 12px 16px 14px; }
+      .modal-instructions { padding: 0 16px 20px; }
+
+      .lang-tab { padding: 8px 18px; }
+
+      .card-name { font-size: 11.5px; }
+    }
+    /* ── DB Setup Button ─────────────────────────────── */
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .db-setup-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 9px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--bg-elevated);
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+
+    .db-setup-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .db-setup-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-muted); }
+
+    .sidebar-tools {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .lang-toggle {
+      font-size: 12px;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+  
+    .card-thumb.media-missing {
+      background: #eef1f6 url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%23c3ccdb' stroke-width='1.6'%3E%3Crect x='3' y='4' width='18' height='16' rx='2'/%3E%3Cpath d='M3 16l5-5 4 4 3-3 6 6'/%3E%3C/svg%3E") center/40px no-repeat;
+    }
+
+    .sidebar-credit {
+      padding: 10px 14px 12px;
+      border-top: 1px solid var(--border, #e8ecf1);
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--text-tertiary, #8a94a6);
+      background: var(--sidebar-bg, #fff);
+    }
+    .sidebar-credit a { color: var(--accent, #2563eb); text-decoration: none; }
+    .sidebar-credit a:hover { text-decoration: underline; }
+
+    .credit-bar {
+      padding: 14px 16px 26px;
+      text-align: center;
+      font-size: 11.5px;
+      line-height: 1.7;
+      color: var(--text-tertiary, #8a94a6);
+    }
+    .credit-bar a { color: var(--accent, #2563eb); text-decoration: none; }
+    .credit-bar a:hover { text-decoration: underline; }
+    html, body { overflow-x: hidden; }
+    @media (max-width: 480px) {
+      .db-setup-btn span { display: none; }
+      .sidebar-tools { gap: 6px; }
+    }
+
+    /* ── 内嵌形态：被主系统 iframe 打开时，隐藏自身品牌栏 ──
+       主系统已有侧栏与面包屑，这里只保留搜索与筛选，视觉上融为一体 */
+    html.embed .sidebar-header { display: none; }
+    html.embed .sidebar-body { padding-top: 16px; }
+</style>
+<script>
+  /* 在主系统 iframe 内（或带 ?embed=1）时切换到内嵌形态 */
+  (function () {
+    var isEmbed = new URLSearchParams(location.search).get('embed') === '1'
+                  || window.self !== window.top;
+    if (isEmbed) document.documentElement.classList.add('embed');
+  })();
+</script>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">健身<span>动作库</span></div>
+      <div class="sidebar-tools">
+        <button class="lang-toggle" id="lang-toggle">中</button>
+        <a class="db-setup-btn" id="db-setup-open" href="setup.html" target="_blank" title="Database Setup" data-i18n-title="dbSetup">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="8" cy="4" rx="6" ry="2.5"/>
+            <path d="M2 4v3c0 1.38 2.69 2.5 6 2.5s6-1.12 6-2.5V4"/>
+            <path d="M2 7v3c0 1.38 2.69 2.5 6 2.5s6-1.12 6-2.5V7"/>
+            <path d="M2 10v2c0 1.38 2.69 2.5 6 2.5s6-1.12 6-2.5v-2"/>
+          </svg>
+          <span data-i18n="dbSetup">DB Setup</span>
+        </a>
+      </div>
+    </div>
+    <div class="sidebar-body">
+      <!-- Search -->
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="6.5" cy="6.5" r="4.5"/>
+          <path d="M10.5 10.5L14 14" stroke-linecap="round"/>
+        </svg>
+        <input type="search" class="search-box" id="search" placeholder="Search exercises…" data-i18n-placeholder="searchPlaceholder" autocomplete="off" />
+        <button class="search-clear" id="search-clear" aria-label="Clear search">×</button>
+      </div>
+
+      <!-- Category filter -->
+      <div class="filter-section">
+        <div class="filter-summary" data-i18n="category">Category</div>
+        <div class="filter-options" id="category-chips"></div>
+      </div>
+
+      <!-- Equipment filter -->
+      <div class="filter-section">
+        <div class="filter-summary" data-i18n="equipment">Equipment</div>
+        <div class="filter-options" id="equipment-chips"></div>
+      </div>
+
+      <!-- Target filter -->
+      <div class="filter-section">
+        <div class="filter-summary" data-i18n="targetMuscle">Target Muscle</div>
+        <div class="filter-options" id="target-chips"></div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="results-bar">
+      <div class="active-filters" id="active-filters"></div>
+      <span class="results-count" id="results-count"></span>
+    </div>
+    <div class="grid-wrapper">
+      <div class="exercise-grid" id="exercise-grid"></div>
+      <div class="load-sentinel" id="load-sentinel">
+        <div class="load-spinner" id="load-spinner"></div>
+      </div>
+    </div>
+    <footer class="credit-bar">
+      动作演示媒体版权归 <a href="https://gymvisual.com" target="_blank" rel="noopener">Gym visual</a> 所有，
+      仅用于动作示范。
+    </footer>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-panel" id="modal-panel">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title"></h2>
+      <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-media">
+      <img class="modal-gif" id="modal-gif" alt="" />
+    </div>
+    <div class="modal-meta" id="modal-meta"></div>
+    <div class="modal-muscles" id="modal-muscles"></div>
+    <div class="modal-instructions" id="modal-instructions"></div>
+  </div>
+</div>
+
+<script>
+    let EXERCISES = [];
+
+  // ── State ──────────────────────────────────────────
+  const state = {
+    exercises: [],
+    filtered: [],
+    search: '',
+    filters: {
+      category: new Set(),
+      equipment: new Set(),
+      target: new Set(),
+    },
+    page: 0,
+    pageSize: 60,
+  };
+
+  let eventsWired = false;
+
+  // Equipment items to show initially (rest behind "show more")
+  const EQUIP_INITIAL = 10;
+
+  // ── DOM Refs ───────────────────────────────────────
+  const gridEl        = document.getElementById('exercise-grid');
+  const sentinelEl    = document.getElementById('load-sentinel');
+  const spinnerEl     = document.getElementById('load-spinner');
+  const countEl       = document.getElementById('results-count');
+  const activeFilEl   = document.getElementById('active-filters');
+  const searchEl      = document.getElementById('search');
+  const searchClearEl = document.getElementById('search-clear');
+  const modalOverlay  = document.getElementById('modal-overlay');
+  const modalTitle    = document.getElementById('modal-title');
+  const modalGif      = document.getElementById('modal-gif');
+  const modalMeta     = document.getElementById('modal-meta');
+  const modalMuscles  = document.getElementById('modal-muscles');
+  const modalInstr    = document.getElementById('modal-instructions');
+  const modalClose    = document.getElementById('modal-close');
+
+  // ── Utility ────────────────────────────────────────
+  function debounce(fn, ms) {
+    let t;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  }
+
+  function capitalize(str) {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+  }
+
+  function uniqueSorted(arr) {
+    return [...new Set(arr)].sort();
+  }
+
+  // ── Data Loading ───────────────────────────────────
+  function init() {
+    state.exercises = EXERCISES;
+
+    // Pre-compute search index per exercise (supports Chinese search via name_zh + tm())
+    state.exercises.forEach(ex => {
+      ex._idx = [
+        ex.name, ex.name_zh || '',
+        tm(ex.category), tm(ex.target), tm(ex.equipment), tm(ex.muscle_group)
+      ].filter(Boolean).join(' ').toLowerCase();
+    });
+
+    buildFilterOptions();
+    applyFilters();
+    if (!eventsWired) {
+      wireEvents();
+      eventsWired = true;
+    }
+  }
+
+  // ── Build Filter Chips ─────────────────────────────
+  function buildFilterOptions() {
+    const cats   = uniqueSorted(state.exercises.map(e => e.category));
+    const equips = uniqueSorted(state.exercises.map(e => e.equipment));
+    const targets = uniqueSorted(state.exercises.map(e => e.target));
+
+    renderChips('category-chips',  cats,   'category');
+    renderChips('equipment-chips', equips, 'equipment');
+    renderChips('target-chips',    targets,'target');
+  }
+
+  function renderChips(containerId, values, filterKey, initialLimit = null) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    const toShow = initialLimit ? values.slice(0, initialLimit) : values;
+    const rest   = initialLimit ? values.slice(initialLimit) : [];
+
+    toShow.forEach(val => {
+      container.appendChild(makeChip(val, filterKey));
+    });
+
+    if (rest.length > 0) {
+      // Hidden chips
+      const hiddenWrap = document.createElement('div');
+      hiddenWrap.style.cssText = 'display:none;flex-wrap:wrap;gap:5px;width:100%;';
+      rest.forEach(val => hiddenWrap.appendChild(makeChip(val, filterKey)));
+      container.appendChild(hiddenWrap);
+
+      // Show more button
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'chip filter-show-more';
+      moreBtn.textContent = `+${rest.length} more`;
+      moreBtn.addEventListener('click', () => {
+        hiddenWrap.style.display = 'flex';
+        moreBtn.remove();
+      });
+      container.appendChild(moreBtn);
+    }
+  }
+
+  function makeChip(value, filterKey) {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = tm(value);
+    btn.dataset.filter = filterKey;
+    btn.dataset.value  = value;
+    return btn;
+  }
+
+  // ── Filter Logic ───────────────────────────────────
+  function toggleFilter(key, value) {
+    const set = state.filters[key];
+    if (set.has(value)) set.delete(value);
+    else set.add(value);
+  }
+
+  function applyFilters() {
+    const q = state.search.toLowerCase().trim();
+    const { category, equipment, target } = state.filters;
+
+    state.filtered = state.exercises.filter(ex => {
+      if (q && !ex._idx.includes(q)) return false;
+      if (category.size  && !category.has(ex.category))   return false;
+      if (equipment.size && !equipment.has(ex.equipment))  return false;
+      if (target.size    && !target.has(ex.target))        return false;
+      return true;
+    });
+
+    state.page = 0;
+    renderGrid();
+    updateResultsBar();
+    updateActiveBadges();
+  }
+
+  // ── Rendering ──────────────────────────────────────
+  function renderGrid() {
+    gridEl.innerHTML = '';
+    const slice = state.filtered.slice(0, state.pageSize);
+
+    if (slice.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = `<p>🔍</p><p>${t('noExercises')}</p>`;
+      gridEl.appendChild(empty);
+      spinnerEl.classList.remove('visible');
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    slice.forEach(ex => frag.appendChild(createCard(ex)));
+    gridEl.appendChild(frag);
+
+    const hasMore = state.filtered.length > state.pageSize;
+    spinnerEl.classList.toggle('visible', hasMore);
+  }
+
+  function appendNextPage() {
+    state.page++;
+    const start = state.page * state.pageSize;
+    const end   = start + state.pageSize;
+    const slice = state.filtered.slice(start, end);
+    if (slice.length === 0) return;
+
+    const frag = document.createDocumentFragment();
+    slice.forEach(ex => frag.appendChild(createCard(ex)));
+    gridEl.appendChild(frag);
+
+    const hasMore = end < state.filtered.length;
+    spinnerEl.classList.toggle('visible', hasMore);
+  }
+
+  function createCard(ex) {
+    const article = document.createElement('article');
+    article.className = 'exercise-card';
+    article.dataset.id = ex.id;
+
+    // Media
+    const media = document.createElement('div');
+    media.className = 'card-media';
+
+    const thumb = document.createElement('img');
+    thumb.className = 'card-thumb';
+    thumb.alt = (currentLang === 'zh' && ex.name_zh) ? ex.name_zh : ex.name;
+    thumb.loading = 'lazy';
+    // 先绑定 error 再赋 src：否则缓存命中或立即失败时事件已经错过，仍会显示破图
+    thumb.onerror = function () {
+      this.onerror = null;
+      this.classList.add('media-missing');
+      this.removeAttribute('src');
+    };
+    thumb.src = ex.image;
+
+    const gif = document.createElement('img');
+    gif.className = 'card-gif';
+    gif.onerror = function () { this.style.display = 'none'; };
+    gif.dataset.src = ex.gif_url;
+    gif.alt = '';
+
+    media.appendChild(thumb);
+    media.appendChild(gif);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    const name = document.createElement('h3');
+    name.className = 'card-name';
+    name.textContent = (currentLang === 'zh' && ex.name_zh) ? ex.name_zh : ex.name;
+
+    const tags = document.createElement('div');
+    tags.className = 'card-tags';
+
+    const catTag = document.createElement('span');
+    catTag.className = 'tag tag-cat';
+    catTag.textContent = tm(ex.category);
+
+    const equipTag = document.createElement('span');
+    equipTag.className = 'tag tag-equip';
+    equipTag.textContent = tm(ex.equipment);
+
+    tags.appendChild(catTag);
+    tags.appendChild(equipTag);
+    body.appendChild(name);
+    body.appendChild(tags);
+    article.appendChild(media);
+    article.appendChild(body);
+
+    return article;
+  }
+
+  function renderSkeletons(count) {
+    gridEl.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const card = document.createElement('div');
+      card.className = 'skeleton-card';
+      card.innerHTML = `
+        <div class="skeleton-media"></div>
+        <div class="skeleton-body">
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+        </div>`;
+      frag.appendChild(card);
+    }
+    gridEl.appendChild(frag);
+  }
+
+  // ── Results Bar ────────────────────────────────────
+  function updateResultsBar() {
+    const total = state.filtered.length;
+    const all   = state.exercises.length;
+    countEl.textContent = t('exercises', total, all);
+  }
+
+  function updateActiveBadges() {
+    activeFilEl.innerHTML = '';
+    const { category, equipment, target } = state.filters;
+    let hasAny = false;
+
+    const addBadges = (set, key) => {
+      set.forEach(val => {
+        hasAny = true;
+        const badge = document.createElement('span');
+        badge.className = 'active-badge';
+        badge.innerHTML = `${tm(val)}<button class="active-badge-remove" data-filter="${key}" data-value="${val}" aria-label="Remove ${val}">×</button>`;
+        activeFilEl.appendChild(badge);
+      });
+    };
+
+    addBadges(category,  'category');
+    addBadges(equipment, 'equipment');
+    addBadges(target,    'target');
+
+    if (hasAny) {
+      const clearAll = document.createElement('button');
+      clearAll.className = 'clear-all';
+      clearAll.textContent = t('clearAll');
+      clearAll.addEventListener('click', clearAllFilters);
+      activeFilEl.appendChild(clearAll);
+    }
+  }
+
+  function clearAllFilters() {
+    state.filters.category.clear();
+    state.filters.equipment.clear();
+    state.filters.target.clear();
+    state.search = '';
+    searchEl.value = '';
+    searchClearEl.classList.remove('visible');
+
+    // Deactivate all chips
+    document.querySelectorAll('.chip.active').forEach(c => c.classList.remove('active'));
+    applyFilters();
+  }
+
+  // ── Modal ──────────────────────────────────────────
+  function openModal(id) {
+    const ex = state.exercises.find(e => e.id === id);
+    if (!ex) return;
+
+    modalTitle.textContent = (currentLang === 'zh' && ex.name_zh) ? ex.name_zh : ex.name;
+    // 详情大图：动图缺失时退回静态图，再缺就隐藏，避免出现破图
+    modalGif.style.visibility = 'visible';
+    modalGif.dataset.fallback = '';
+    modalGif.onerror = function () {
+      if (!this.dataset.fallback) {
+        this.dataset.fallback = '1';
+        this.src = ex.image;
+      } else {
+        this.onerror = null;
+        this.style.visibility = 'hidden';
+      }
+    };
+    modalGif.src = ex.gif_url;
+    modalGif.alt = (currentLang === 'zh' && ex.name_zh) ? ex.name_zh : ex.name;
+
+    // Meta chips
+    modalMeta.innerHTML = '';
+    const metaItems = [
+      { label: t('bodyPart'), value: tm(ex.body_part || ex.category) },
+      { label: t('equipment'), value: tm(ex.equipment) },
+      { label: t('target'),    value: tm(ex.target) },
+    ];
+    metaItems.forEach(({ label, value }) => {
+      const chip = document.createElement('div');
+      chip.className = 'meta-chip';
+      chip.innerHTML = `<span class="meta-chip-label">${label}</span><span class="meta-chip-value">${value}</span>`;
+      modalMeta.appendChild(chip);
+    });
+
+    // Muscles
+    modalMuscles.innerHTML = '';
+    const primaryMuscles = ex.target ? [tm(ex.target)] : [];
+    const secondaryRaw = ex.secondary_muscles || (ex.muscle_group ? [ex.muscle_group] : []);
+    const secondaryMuscles = secondaryRaw.filter(m => m !== ex.target).map(tm);
+
+    const musclesHeader = document.createElement('div');
+    musclesHeader.className = 'modal-muscles-label';
+    musclesHeader.textContent = t('muscles');
+    modalMuscles.appendChild(musclesHeader);
+
+    const musclesGrid = document.createElement('div');
+    musclesGrid.className = 'muscles-grid';
+
+    const makeMuscleGroup = (title, names, isPrimary) => {
+      const group = document.createElement('div');
+      group.className = 'muscles-group';
+      const lbl = document.createElement('div');
+      lbl.className = 'muscles-group-label';
+      lbl.textContent = title;
+      const row = document.createElement('div');
+      row.className = 'muscle-tags';
+      names.forEach(name => {
+        const t = document.createElement('span');
+        t.className = 'muscle-tag' + (isPrimary ? ' primary' : '');
+        t.textContent = name;
+        row.appendChild(t);
+      });
+      group.appendChild(lbl);
+      group.appendChild(row);
+      return group;
+    };
+
+    if (primaryMuscles.length > 0)   musclesGrid.appendChild(makeMuscleGroup(t('primary'), primaryMuscles, true));
+    if (secondaryMuscles.length > 0)  musclesGrid.appendChild(makeMuscleGroup(t('secondary'), secondaryMuscles, false));
+    if (primaryMuscles.length > 0 || secondaryMuscles.length > 0) modalMuscles.appendChild(musclesGrid);
+
+    // Instructions — format is always keyed by language code
+    modalInstr.innerHTML = '';
+    const LANG_LABELS = {
+      zh: '简体中文',
+      en: 'English',
+      // es: 'Español', it: 'Italiano', tr: 'Türkçe', ru: 'Русский',
+      // hi: 'हिन्दी', pl: 'Polski', ko: '한국어', fr: 'Français'
+    };
+    const langs = (['zh', 'en' /*, 'es', 'it', 'tr', 'ru', 'hi', 'pl', 'ko', 'fr' */]
+      .map(code => ({ code, steps: ex.instruction_steps?.[code] ?? [] }))
+      .filter(l => l.steps.length > 0));
+
+    if (langs.length > 0) {
+      const instrLabel = document.createElement('span');
+      instrLabel.className = 'modal-instructions-label';
+      instrLabel.textContent = t('instructions');
+      modalInstr.appendChild(instrLabel);
+
+      const list = document.createElement('ol');
+      list.className = 'instructions-list';
+
+      function renderSteps(steps) {
+        list.innerHTML = '';
+        steps.forEach((step, i) => {
+          const li = document.createElement('li');
+          li.className = 'instruction-step';
+          li.innerHTML = `<span class="step-num">${i + 1}</span><span class="step-text">${step}</span>`;
+          list.appendChild(li);
+        });
+      }
+
+      if (langs.length > 1) {
+        const tabs = document.createElement('div');
+        tabs.className = 'lang-tabs';
+        const tabButtons = langs.map((l, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'lang-tab' + (i === 0 ? ' active' : '');
+          btn.textContent = LANG_LABELS[l.code] ?? l.code;
+          tabs.appendChild(btn);
+          return btn;
+        });
+        modalInstr.appendChild(tabs);
+
+        tabButtons.forEach((btn, i) => {
+          btn.addEventListener('click', () => {
+            tabButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderSteps(langs[i].steps);
+          });
+        });
+      }
+
+      renderSteps(langs[0].steps);
+      modalInstr.appendChild(list);
+    }
+
+    modalOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    modalClose.focus();
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+    modalGif.src = '';
+  }
+
+  // ── Events ─────────────────────────────────────────
+  function wireEvents() {
+    // Search
+    searchEl.addEventListener('input', debounce(() => {
+      state.search = searchEl.value;
+      searchClearEl.classList.toggle('visible', state.search.length > 0);
+      applyFilters();
+    }, 250));
+
+    searchClearEl.addEventListener('click', () => {
+      searchEl.value = '';
+      state.search = '';
+      searchClearEl.classList.remove('visible');
+      applyFilters();
+    });
+
+    // Filter chips (delegated)
+    document.querySelector('.sidebar-body').addEventListener('click', e => {
+      const chip = e.target.closest('[data-filter]');
+      if (!chip || chip.classList.contains('filter-show-more')) return;
+      const { filter, value } = chip.dataset;
+      toggleFilter(filter, value);
+      chip.classList.toggle('active');
+      applyFilters();
+    });
+
+    // Remove active badge
+    activeFilEl.addEventListener('click', e => {
+      const btn = e.target.closest('.active-badge-remove');
+      if (!btn) return;
+      const { filter, value } = btn.dataset;
+      state.filters[filter].delete(value);
+      // Deactivate corresponding chip
+      const chip = document.querySelector(`.chip[data-filter="${filter}"][data-value="${value}"]`);
+      if (chip) chip.classList.remove('active');
+      applyFilters();
+    });
+
+    // Card hover → load GIF
+    gridEl.addEventListener('mouseover', e => {
+      const card = e.target.closest('.exercise-card');
+      if (!card) return;
+      const gif = card.querySelector('.card-gif');
+      if (gif && gif.dataset.src && !gif.src) {
+        gif.src = gif.dataset.src;
+      }
+    });
+
+    // Card click → modal
+    gridEl.addEventListener('click', e => {
+      const card = e.target.closest('.exercise-card');
+      if (card) openModal(card.dataset.id);
+    });
+
+    // Modal close
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', e => {
+      if (e.target === modalOverlay) closeModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Infinite scroll
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && spinnerEl.classList.contains('visible')) {
+        appendNextPage();
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(sentinelEl);
+  }
+
+
+
+  // ══════════════════════════════════════════════════
+  // ── i18n / Bilingual (EN / 中文) ──────────────────
+  // ══════════════════════════════════════════════════
+
+  // ── Metadata value translation (category, body_part, equipment, target, muscle) ──
+  const META_ZH = {
+    // categories / body_part
+    "back": "背部", "cardio": "有氧", "chest": "胸部",
+    "lower arms": "前臂", "lower legs": "小腿", "neck": "颈部",
+    "shoulders": "肩部", "upper arms": "上臂", "upper legs": "大腿", "waist": "腰部",
+    // equipment
+    "assisted": "辅助", "band": "弹力带", "barbell": "杠铃",
+    "body weight": "自重", "bosu ball": "波速球", "cable": "绳索",
+    "dumbbell": "哑铃", "elliptical machine": "椭圆机", "ez barbell": "EZ杠",
+    "hammer": "锤", "kettlebell": "壶铃", "leverage machine": "固定器械",
+    "medicine ball": "药球", "olympic barbell": "奥林匹克杠铃",
+    "resistance band": "阻力带", "roller": "泡沫轴", "rope": "绳",
+    "skierg machine": "滑雪测功仪", "sled machine": "雪橇机",
+    "smith machine": "史密斯机", "stability ball": "健身球",
+    "stationary bike": "固定自行车", "stepmill machine": "台阶机",
+    "tire": "轮胎", "trap bar": "六角杠", "weighted": "负重",
+    "upper body ergometer": "上肢测功仪", "wheel roller": "健腹轮",
+    // target
+    "abductors": "外展肌", "abs": "腹肌", "adductors": "内收肌",
+    "biceps": "二头肌", "calves": "小腿", "cardiovascular system": "心血管系统",
+    "delts": "三角肌", "forearms": "前臂", "glutes": "臀肌",
+    "hamstrings": "腘绳肌", "lats": "背阔肌", "levator scapulae": "肩胛提肌",
+    "pectorals": "胸肌", "quads": "股四头肌", "serratus anterior": "前锯肌",
+    "spine": "脊柱", "traps": "斜方肌", "triceps": "三头肌",
+    "upper back": "上背部",
+    // muscle_group / secondary
+    "abdominals": "腹肌", "ankle stabilizers": "踝部稳定肌", "ankles": "脚踝",
+    "brachialis": "肱肌", "chest": "胸部", "core": "核心",
+    "deltoids": "三角肌", "feet": "脚", "grip muscles": "握力肌群",
+    "groin": "腹股沟", "hands": "手", "hip flexors": "髋屈肌",
+    "inner thighs": "大腿内侧", "latissimus dorsi": "背阔肌",
+    "lower abs": "下腹", "lower back": "下背部", "obliques": "腹斜肌",
+    "quadriceps": "股四头肌", "rear deltoids": "后三角肌",
+    "rhomboids": "菱形肌", "rotator cuff": "肩袖",
+    "shins": "胫骨", "shoulders": "肩部",
+    "soleus": "比目鱼肌", "sternocleidomastoid": "胸锁乳突肌",
+    "trapezius": "斜方肌", "upper chest": "上胸",
+    "wrist extensors": "腕伸肌", "wrist flexors": "腕屈肌", "wrists": "手腕",
+  };
+
+  let currentLang = localStorage.getItem('lang') || 'zh';
+
+  function tm(value) {
+    if (currentLang !== 'zh' || !value) return value;
+    return META_ZH[value] || value;
+  }
+
+  const I18N = {
+    en: {
+      appTitle: 'ExerciseDB',
+      dbSetup: 'DB Setup',
+      searchPlaceholder: 'Search exercises…',
+      category: 'Category',
+      equipment: 'Equipment',
+      targetMuscle: 'Target Muscle',
+      dbSetupTitle: 'Database Setup',
+      dbSetupSubtitle: 'Import 1,324 exercises into your database in 3 steps.',
+      createTable: 'Create Table',
+      createTableDesc: 'Run this in your database client (SSMS, DBeaver, pgAdmin, etc.):',
+      importData: 'Import Data',
+      importDataDesc: 'Generate a .sql file with all 1,324 INSERT statements — runs in any DB client. The file is built entirely in your browser, nothing is uploaded.',
+      mediaFiles: 'Media Files',
+      mediaFilesDesc: 'Copy the images/ and videos/ folders to your web server root (or a CDN). The image and gif_url columns store relative paths — prepend your base URL in your app if needed.',
+      copy: 'Copy',
+      copied: 'Copied!',
+      generateInsert: 'Generate INSERT SQL',
+      more: (n) => `+${n} more`,
+      exercises: (total, all) =>
+        total === all ? `${all.toLocaleString()} exercises` : `${total.toLocaleString()} of ${all.toLocaleString()} exercises`,
+      noExercises: 'No exercises found',
+      bodyPart: 'Body Part',
+      target: 'Target',
+      muscles: 'Muscles',
+      primary: 'Primary',
+      secondary: 'Secondary',
+      instructions: 'Instructions',
+      clearAll: 'Clear all',
+    },
+    zh: {
+      appTitle: '运动库',
+      dbSetup: '数据库设置',
+      searchPlaceholder: '搜索动作…',
+      category: '分类',
+      equipment: '器械',
+      targetMuscle: '目标肌肉',
+      dbSetupTitle: '数据库设置',
+      dbSetupSubtitle: '通过 3 个步骤将 1,324 个动作导入数据库。',
+      createTable: '建表',
+      createTableDesc: '在数据库客户端中运行（SSMS、DBeaver、pgAdmin 等）：',
+      importData: '导入数据',
+      importDataDesc: '生成包含全部 1,324 条 INSERT 语句的 .sql 文件。文件完全在浏览器内生成，不会上传任何内容。',
+      mediaFiles: '媒体文件',
+      mediaFilesDesc: '将 images/ 和 videos/ 文件夹复制到你的网络服务器根目录（或 CDN）。image 和 gif_url 列存储相对路径，在应用中无需额外处理。',
+      copy: '复制',
+      copied: '已复制!',
+      generateInsert: '生成 INSERT SQL',
+      more: (n) => `+${n} 更多`,
+      exercises: (total, all) =>
+        total === all ? `共 ${all.toLocaleString()} 个动作` : `显示 ${total.toLocaleString()} / 共 ${all.toLocaleString()} 个动作`,
+      noExercises: '未找到动作',
+      bodyPart: '身体部位',
+      target: '目标',
+      muscles: '肌肉',
+      primary: '主要',
+      secondary: '副助',
+      instructions: '动作说明',
+      clearAll: '清除所有',
+    },
+  };
+
+  function t(key, ...args) {
+    const val = I18N[currentLang][key];
+    return typeof val === 'function' ? val(...args) : val;
+  }
+
+  function applyLang() {
+    document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      el.textContent = t(key);
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      el.placeholder = t(el.dataset.i18nPlaceholder);
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = t(el.dataset.i18nTitle);
+    });
+    document.getElementById('lang-toggle').textContent = currentLang === 'zh' ? 'EN' : '中';
+    document.getElementById('db-setup-open').href = 'setup.html?lang=' + currentLang;
+  }
+
+  function toggleLang() {
+    currentLang = currentLang === 'en' ? 'zh' : 'en';
+    localStorage.setItem('lang', currentLang);
+    applyLang();
+    // 同步更新 DB Setup 链接的语言参数
+    document.getElementById('db-setup-open').href = 'setup.html?lang=' + currentLang;
+    // Re-render current state
+    renderSkeletons(6);
+    init();
+  }
+
+  function renderChips(containerId, values, filterKey, initialLimit = null) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    const toShow = initialLimit ? values.slice(0, initialLimit) : values;
+    const rest   = initialLimit ? values.slice(initialLimit) : [];
+
+    toShow.forEach(val => {
+      container.appendChild(makeChip(val, filterKey));
+    });
+
+    if (rest.length > 0) {
+      const hiddenWrap = document.createElement('div');
+      hiddenWrap.style.cssText = 'display:none;flex-wrap:wrap;gap:5px;width:100%;';
+      rest.forEach(val => hiddenWrap.appendChild(makeChip(val, filterKey)));
+      container.appendChild(hiddenWrap);
+
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'chip filter-show-more';
+      moreBtn.textContent = t('more', rest.length);
+      moreBtn.addEventListener('click', () => {
+        hiddenWrap.style.display = 'flex';
+        moreBtn.remove();
+      });
+      container.appendChild(moreBtn);
+    }
+  }
+
+  // Wire lang toggle
+  document.getElementById('lang-toggle').addEventListener('click', toggleLang);
+  applyLang();
+
+
+
+  // 数据改为异步加载 data/exercises.json：HTML 从 16MB 降到几十 KB，JSON 可被浏览器缓存
+  fetch('./data/exercises.json')
+    .then(function (resp) {
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      return resp.json();
+    })
+    .then(function (data) {
+      EXERCISES = data;
+      init();
+    })
+    .catch(function (err) {
+      var tip = document.createElement('div');
+      tip.style.cssText = 'padding:24px;font:14px/1.7 system-ui;color:#b42318;background:#fff4f3;border:1px solid #fecdca;border-radius:12px;margin:24px';
+      tip.textContent = '动作数据加载失败：' + err.message + '。请确认 data/exercises.json 与页面在同一目录下。';
+      document.body.prepend(tip);
+    });
+</script>
+</body>
+</html>

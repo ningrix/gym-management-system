@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>多角色启动台 · 健身房管理系统</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh;
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #1f2d3d 0%, #2c4a6e 55%, #3a6ea5 100%);
+            color: #303133;
+            display: flex; align-items: center; justify-content: center;
+            padding: 40px 20px;
+        }
+        .wrap { width: 1080px; max-width: 100%; }
+        .head { text-align: center; color: #fff; margin-bottom: 34px; }
+        .head .logo {
+            width: 56px; height: 56px; line-height: 56px; margin: 0 auto 14px;
+            background: #409eff; border-radius: 12px; color: #fff;
+            font-size: 17px; font-weight: 700;
+        }
+        .head h1 { font-size: 24px; margin: 0 0 10px; font-weight: 600; letter-spacing: 1px; }
+        .head p { margin: 0; color: #c8d6e5; font-size: 13.5px; line-height: 1.8; }
+        .cards { display: flex; gap: 18px; }
+        .card {
+            flex: 1; background: #fff; border-radius: 10px; overflow: hidden;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, .26); display: flex; flex-direction: column;
+        }
+        .card .bar { height: 5px; }
+        .card.admin .bar { background: #409eff; }
+        .card.member .bar { background: #e6a23c; }
+        .card.coach .bar { background: #67c23a; }
+        .card .body { padding: 24px 22px 22px; flex: 1; display: flex; flex-direction: column; }
+        .card h2 { font-size: 17px; margin: 0 0 6px; }
+        .card .desc { color: #909399; font-size: 12.5px; line-height: 1.7; min-height: 42px; }
+        .acct { margin: 14px 0 18px; padding: 10px 12px; background: #f7f9fc; border-radius: 6px;
+                font-size: 12.5px; color: #606266; line-height: 1.9; }
+        .acct b { color: #303133; }
+        button {
+            width: 100%; padding: 11px 0; border: none; border-radius: 6px; cursor: pointer;
+            font-size: 14px; color: #fff; background: #409eff; transition: .2s;
+        }
+        .card.member button { background: #e6a23c; }
+        .card.coach button { background: #67c23a; }
+        button:hover { filter: brightness(1.06); }
+        .foot { text-align: center; color: #9fb3c8; font-size: 12.5px; margin-top: 26px; line-height: 1.9; }
+        .foot a { color: #cfe3f7; }
+    
+    /* ---- 科技风覆盖（与全站统一）---- */
+    body {
+        background: radial-gradient(1200px 700px at 50% -10%, #12224a 0%, #070D1A 55%, #050914 100%) !important;
+        font-family: "Inter", "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+    .head h1 { letter-spacing: .5px; }
+    .head p { color: #9FB0CC; }
+    .head .logo {
+        background: linear-gradient(135deg, #1E6FFF, #22D3EE) !important;
+        box-shadow: 0 10px 28px rgba(30, 111, 255, .45);
+    }
+    .card {
+        background: #0E1626 !important;
+        border: 1px solid rgba(99, 140, 255, .18) !important;
+        box-shadow: 0 18px 44px rgba(2, 8, 20, .55) !important;
+        border-radius: 12px;
+    }
+    .card .bar { height: 3px; }
+    .card h2 { color: #E6EDFA; }
+    .card .desc { color: #9FB0CC; }
+    .acct { background: #0B1424; border: 1px solid rgba(99, 140, 255, .14); color: #C6D3E8; }
+    .acct b { color: #22D3EE; }
+    button { border-radius: 8px; box-shadow: 0 8px 22px rgba(30, 111, 255, .28); }
+    .card.admin button { background: linear-gradient(135deg, #1E6FFF, #2E86FF); }
+    .card.member button { background: linear-gradient(135deg, #17C3A2, #22D3EE); color: #05201c; }
+    .card.coach button { background: linear-gradient(135deg, #6D5BFF, #22D3EE); }
+    .foot { color: #6F83A3; }
+    .foot a { color: #C6D3E8; }
+    .foot a:hover { color: #22D3EE; }
+    @media (max-width: 900px) { .cards { flex-direction: column; } }
+
+    /* ---- 白底暖光（与全站统一）---- */
+    body {
+        background: radial-gradient(1200px 700px at 50% -10%, #FFF3E3 0%, #FDFAF6 45%, #FFFFFF 100%) !important;
+        color: #1D1D1F;
+    }
+    .head h1 { color: #1D1D1F; }
+    .head p { color: #6E6E73 !important; }
+    .head .logo {
+        background: linear-gradient(135deg, #F3B562, #E08D45) !important;
+        box-shadow: 0 10px 26px rgba(224, 141, 69, .30);
+    }
+    .card {
+        background: #FFFFFF !important;
+        border: 1px solid #EDEAE4 !important;
+        box-shadow: 0 1px 2px rgba(29,29,31,.04), 0 18px 44px rgba(29,29,31,.08) !important;
+        border-radius: 20px;
+    }
+    .card .bar { height: 3px; }
+    .card h2 { color: #1D1D1F !important; }
+    .card .desc { color: #6E6E73 !important; }
+    .acct { background: #FBF7F2 !important; border: 1px solid #F0EAE0; color: #424245 !important; }
+    .acct b { color: #C97B3C !important; }
+    button { border-radius: 999px !important; box-shadow: 0 8px 20px rgba(29,29,31,.10); }
+    .card.admin button { background: #1D1D1F !important; color: #fff !important; }
+    .card.member button { background: #0071E3 !important; color: #fff !important; }
+    .card.coach button { background: #E9A23B !important; color: #4A2E10 !important; }
+    .foot { color: #86868B !important; }
+    .foot a { color: #0071E3 !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="head">
+        <div class="logo">GYM</div>
+        <h1>多角色启动台</h1>
+        <p>每个按钮会在独立标签页中打开对应角色，登录状态互不干扰，可同时在线演示。</p>
+    </div>
+
+    <div class="cards">
+        <div class="card admin">
+            <div class="bar"></div>
+            <div class="body">
+                <h2>管理员端</h2>
+                <div class="desc">会员、会员卡、教练、课程、排课、预约、体测、器材与统计报表。</div>
+                <div class="acct">账号 <b>admin</b><br>口令 <b>admin2026</b></div>
+                <button onclick="openRole('admin')">在新标签页打开</button>
+            </div>
+        </div>
+        <div class="card member">
+            <div class="bar"></div>
+            <div class="body">
+                <h2>会员端</h2>
+                <div class="desc">查看本人会员卡与体测，浏览课程并预约、取消本人预约。</div>
+                <div class="acct">账号 <b>member01</b><br>口令 <b>gym2026</b></div>
+                <button onclick="openRole('member')">在新标签页打开</button>
+            </div>
+        </div>
+        <div class="card coach">
+            <div class="bar"></div>
+            <div class="body">
+                <h2>教练端</h2>
+                <div class="desc">今日课表、预约名单、为学员签到、录入学员体测。</div>
+                <div class="acct">账号 <b>coach01</b><br>口令 <b>gym2026</b></div>
+                <button onclick="openRole('coach')">在新标签页打开</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="foot">
+        三个窗口共用同一套后端服务，各自持有独立令牌；关闭标签页只结束该窗口的会话。<br>
+        也可以直接访问 <a href="/">普通登录页</a>（不带角色参数，登录后按账号角色自动归位）。<br>
+        返回 <a href="/landing.html">系统介绍首页</a> 查看功能概览与实时运行数据。
+    </div>
+</div>
+<script>
+    function openRole(role) {
+        // noopener 可避免新标签页复制当前页的 sessionStorage，确保角色域独立
+        window.open('/?role=' + role, '_blank', 'noopener');
+    }
+</script>
+</body>
+</html>

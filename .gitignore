@@ -1,0 +1,28 @@
+# ---------- 构建产物 ----------
+target/
+gym-management/target/
+*.jar
+*.war
+*.class
+
+# ---------- 动作库媒体（约 139MB，按 README 说明用脚本补齐） ----------
+exercises-dataset/videos/
+
+# ---------- 工具与临时文件（只保留媒体补齐脚本，排除其余开发脚本与缓存） ----------
+tools/*
+!tools/fetch_media_fast.py
+!tools/fetch_exercise_media.py
+assets/
+_plugin-backup-*/
+_probe.ps1
+.mimosa/
+.workbuddy/
+
+# ---------- 论文与答辩材料（含个人身份信息，不入公开仓库） ----------
+论文/
+答辩PPT/
+
+# ---------- 系统与日志 ----------
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,10 @@
+# 测试专用：独立内存库 + 8081 端口，避免冒烟测试污染演示数据
+server:
+  port: 8081
+spring:
+  datasource:
+    url: jdbc:h2:mem:gymtest;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:db/data.sql

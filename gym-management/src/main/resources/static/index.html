@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>健身房管理系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="lib/element-plus.css">
+    <style>
+        * { box-sizing: border-box; }
+        /* 方案 B 主题令牌：清爽专业风，主色 #1E6FFF，强调 #17C3A2 */
+        :root {
+            --el-color-primary: #1E6FFF;
+            --el-color-primary-light-3: #6b9bff;
+            --el-color-primary-light-5: #8fb4ff;
+            --el-color-primary-light-7: #c0d5ff;
+            --el-color-primary-light-8: #d9e6ff;
+            --el-color-primary-light-9: #ecf2ff;
+            --el-color-primary-dark-2: #1859cc;
+            --el-border-color: #E5E8EF;
+            --el-fill-color-light: #F5F7FA;
+        }
+        html, body { margin: 0; padding: 0; height: 100%; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #f0f2f5;
+            color: #303133;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+        #app { height: 100%; }
+        .login-wrap {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1f2d3d 0%, #2c4a6e 55%, #3a6ea5 100%);
+            position: relative;
+        }
+        .login-wrap::after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: 0; height: 40%;
+            background: radial-gradient(ellipse at 50% 100%, rgba(64,158,255,.28), transparent 70%);
+        }
+        .login-card {
+            width: 420px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 38px 40px 30px;
+            box-shadow: 0 18px 48px rgba(0, 0, 0, .28);
+            position: relative;
+            z-index: 2;
+        }
+        .login-brand { text-align: center; margin-bottom: 26px; }
+        .login-brand .logo {
+            width: 54px; height: 54px; line-height: 54px; margin: 0 auto 12px;
+            border-radius: 12px; background: #409eff; color: #fff;
+            font-size: 17px; font-weight: 700; letter-spacing: 0;
+        }
+        .login-brand h1 { font-size: 21px; margin: 0 0 6px; font-weight: 600; letter-spacing: 1px; }
+        .login-brand p { margin: 0; color: #909399; font-size: 12.5px; letter-spacing: 2px; }
+        .login-tip {
+            margin-top: 18px; padding: 10px 12px; background: #f4f8ff;
+            border: 1px solid #d9ecff; border-radius: 4px;
+            color: #606266; font-size: 12px; line-height: 1.9;
+        }
+        .login-tip b { color: #409eff; font-weight: 600; }
+        .login-tip a { color: #409eff; text-decoration: none; }
+        .login-tip a:hover { text-decoration: underline; }
+        .scope-tag {
+            display: inline-block; margin: 0 auto 14px; padding: 3px 12px;
+            border: 1px solid #d9ecff; background: #ecf5ff; color: #409eff;
+            border-radius: 12px; font-size: 12.5px;
+        }
+        .login-brand { position: relative; }
+
+        .layout { height: 100vh; }
+        .sidebar {
+            background: #ffffff;
+            border-right: 1px solid #E5E8EF;
+            color: #464c56;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sidebar .brand {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 18px;
+            border-bottom: 1px solid #E5E8EF;
+            color: #1F2329;
+            font-size: 15.5px;
+            font-weight: 600;
+            letter-spacing: .5px;
+        }
+        .sidebar .brand .dot {
+            width: 26px; height: 26px; line-height: 26px; text-align: center;
+            background: #409eff; border-radius: 6px; font-size: 13px;
+        }
+        .sidebar .nav { flex: 1; overflow-y: auto; padding-bottom: 16px; }
+        .sidebar .nav-item {
+            height: 40px; line-height: 40px; padding: 0 18px 0 22px; cursor: pointer;
+            color: #464c56; font-size: 13.5px; position: relative; transition: .15s;
+        }
+        .sidebar .nav-item:hover { background: #F2F4F8; color: #1F2329; }
+        .sidebar .nav-item.active { background: #EAF1FF; color: #1E6FFF; font-weight: 600; }
+        .sidebar .nav-item.active .bar { background: #1E6FFF; }
+        .sidebar .nav-item .bar {
+            position: absolute; left: 9px; top: 17px; width: 3px; height: 11px;
+            background: transparent; border-radius: 2px;
+        }
+        .sidebar .menu-group {
+            padding: 16px 18px 6px; font-size: 11.5px; color: #6b7c8f; letter-spacing: 1px;
+        }
+
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e6e8eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
+            height: 60px;
+        }
+        .topbar .crumb { color: #909399; font-size: 13px; }
+        .topbar .crumb b { color: #303133; font-weight: 600; font-size: 15px; }
+        .topbar .user { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #606266; }
+        .badge-role {
+            display: inline-block; padding: 2px 9px; border-radius: 10px;
+            font-size: 12px; background: #ecf5ff; color: #409eff; border: 1px solid #d9ecff;
+        }
+        .badge-role.coach { background: #f0f9eb; color: #67c23a; border-color: #e1f3d8; }
+        .badge-role.member { background: #fdf6ec; color: #e6a23c; border-color: #faecd8; }
+
+        .main-area { padding: 18px 20px 28px; overflow-y: auto; background: #f0f2f5; }
+        .layout, .layout > .el-container { background: #f0f2f5; }
+
+        /* 动作库以 iframe 内嵌在主内容区，独立滚动、不拖慢主系统 */
+        .exercise-embed { height: calc(100vh - 106px); }
+        .exercise-embed iframe {
+            display: block; width: 100%; height: 100%; border: 0;
+            border-radius: 6px; background: #fff;
+            box-shadow: 0 1px 4px rgba(0, 21, 41, .06);
+        }
+        @media (max-width: 768px) {
+            .exercise-embed { height: calc(100vh - 98px); }
+        }
+        .card {
+            background: #fff; border-radius: 5px; padding: 16px 18px;
+            box-shadow: 0 1px 4px rgba(0, 21, 41, .06); margin-bottom: 16px;
+        }
+        .card-title {
+            font-size: 15px; font-weight: 600; color: #303133;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .card-title::before {
+            content: ""; width: 3px; height: 15px; background: #409eff;
+            border-radius: 2px; margin-right: 8px; display: inline-block; vertical-align: -2px;
+        }
+        .card-title span.t { flex: 1; }
+        .stat-row { display: flex; gap: 16px; margin-bottom: 16px; }
+        .stat-card {
+            flex: 1; background: #fff; border-radius: 5px; padding: 18px 20px;
+            box-shadow: 0 1px 4px rgba(0, 21, 41, .06);
+            border-left: 4px solid #409eff;
+        }
+        .stat-card .label { color: #909399; font-size: 13px; margin-bottom: 8px; }
+        .stat-card .value { font-size: 27px; font-weight: 700; color: #303133; line-height: 1.1; }
+        .stat-card .value small { font-size: 13px; font-weight: 400; color: #909399; margin-left: 4px; }
+        .stat-card .sub { margin-top: 8px; font-size: 12px; color: #a8abb2; }
+        .stat-card.c2 { border-left-color: #67c23a; }
+        .stat-card.c3 { border-left-color: #e6a23c; }
+        .stat-card.c4 { border-left-color: #f56c6c; }
+        .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+        .toolbar .right { margin-left: auto; display: flex; gap: 10px; }
+        .chart { width: 100%; height: 290px; }
+        .chart-sm { width: 100%; height: 250px; }
+        .two-col { display: flex; gap: 16px; }
+        .two-col > * { flex: 1; min-width: 0; }
+        .muted { color: #909399; font-size: 12.5px; }
+        .el-table { font-size: 13.5px; --el-table-header-bg-color: #F7F9FC; }
+        .el-table th.el-table__cell { background: #F7F9FC; color: #646A73; font-weight: 500; font-size: 12px; height: 44px; }
+        .el-table .el-table__cell { padding: 11px 0; }
+        .el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf { border-bottom: 1px solid #EEF1F6; }
+        .el-table .el-table__row:hover > td { background: #F5F9FF; }
+        .pager { margin-top: 14px; display: flex; justify-content: flex-end; }
+        .notice-item {
+            padding: 11px 0; border-bottom: 1px dashed #ebeef5; display: flex; gap: 10px;
+        }
+        .notice-item:last-child { border-bottom: none; }
+        .notice-item .tag {
+            font-size: 11px; padding: 1px 6px; border-radius: 3px; height: 19px;
+            background: #ecf5ff; color: #409eff; white-space: nowrap;
+        }
+        .notice-item .txt { flex: 1; color: #303133; font-size: 13.5px; }
+        .notice-item .time { color: #a8abb2; font-size: 12px; }
+        .course-card {
+            border: 1px solid #ebeef5; border-radius: 6px; padding: 14px 16px;
+            margin-bottom: 12px; transition: .2s; background: #fff;
+        }
+        .course-card:hover { border-color: #b3d8ff; box-shadow: 0 2px 10px rgba(64,158,255,.12); }
+        .course-card .hd { display: flex; justify-content: space-between; align-items: center; }
+        .course-card .nm { font-size: 15px; font-weight: 600; }
+        .course-card .meta { color: #909399; font-size: 12.5px; margin-top: 7px; line-height: 1.9; }
+        .seat { color: #409eff; font-weight: 600; }
+        .seat.full { color: #f56c6c; }
+        .empty-tip { text-align: center; color: #a8abb2; padding: 40px 0; font-size: 13px; }
+        .tag-normal { color: #67c23a; }
+        .tag-repair { color: #e6a23c; }
+        .tag-scrap { color: #909399; }
+        .money { font-family: Consolas, "Microsoft YaHei", monospace; font-weight: 600; }
+        .el-dialog__body { padding-top: 10px; }
+        .detail-label { color: #909399; width: 92px; display: inline-block; }
+    </style>
+    <link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+<div id="app">
+    <div v-if="!logged" class="login-wrap">
+        <video class="login-hero-video" autoplay muted loop playsinline preload="metadata"
+               poster="media/hero-warm-poster.jpg" aria-hidden="true" tabindex="-1">
+            <source src="media/hero-warm.mp4" type="video/mp4">
+        </video>
+        <div class="login-card">
+            <div class="login-brand">
+                <div class="logo">GYM</div>
+                <h1>健身房管理系统</h1>
+                <p>GYM MANAGEMENT SYSTEM</p>
+                <div class="scope-tag" v-if="scopeLabel">当前窗口：{{ scopeLabel }}</div>
+            </div>
+            <el-form :model="loginForm" label-position="top" @keyup.enter="doLogin">
+                <el-form-item label="账号">
+                    <el-input v-model="loginForm.username" size="large" placeholder="请输入账号" clearable/>
+                </el-form-item>
+                <el-form-item label="密码">
+                    <el-input v-model="loginForm.password" size="large" type="password"
+                              placeholder="请输入密码" show-password/>
+                </el-form-item>
+                <el-button type="primary" size="large" style="width:100%;margin-top:6px"
+                           :loading="loginLoading" @click="doLogin">登 录
+                </el-button>
+            </el-form>
+            <div class="login-tip">
+                演示账号：管理员 <b>admin</b> / <b>admin2026</b><br>
+                会员 <b>member01</b> · 教练 <b>coach01</b>，口令均为 <b>gym2026</b><br>
+                <a href="/launcher.html">需要三种角色同时在线？打开多角色启动台 →</a><br>
+                <a href="/landing.html">查看系统介绍首页 →</a>
+            </div>
+        </div>
+    </div>
+
+    <el-container v-else class="layout">
+        <el-aside width="212px" class="sidebar">
+            <div class="brand">
+                <span class="dot">GYM</span>
+                <span>健身房管理系统</span>
+            </div>
+            <div class="nav">
+                <template v-for="group in menus" :key="group.title">
+                    <div class="menu-group">{{ group.title }}</div>
+                    <div v-for="item in group.items" :key="item.key" class="nav-item"
+                         :class="{ active: page === item.key }"
+                         @click="item.external ? openExternal(item) : go(item.key)">
+                        <span class="bar"></span>{{ item.label }}
+                    </div>
+                </template>
+            </div>
+        </el-aside>
+        <el-container>
+            <el-header class="topbar" height="60px">
+                <div class="crumb"><b>{{ currentTitle }}</b> <span v-if="subTitle">/ {{ subTitle }}</span></div>
+                <div class="user">
+                    <span class="badge-role" :class="roleClass">{{ roleLabel }}</span>
+                    <span>{{ user.realName }}</span>
+                    <el-button link type="primary" @click="pwdVisible = true">修改密码</el-button>
+                    <el-button link type="danger" @click="logout">退出</el-button>
+                </div>
+            </el-header>
+            <el-main class="main-area">
+                <component :is="page"/>
+            </el-main>
+        </el-container>
+    </el-container>
+
+    <el-dialog v-model="pwdVisible" title="修改密码" width="420px">
+        <el-form :model="pwdForm" label-width="86px">
+            <el-form-item label="原密码">
+                <el-input v-model="pwdForm.oldPassword" type="password" show-password/>
+            </el-form-item>
+            <el-form-item label="新密码">
+                <el-input v-model="pwdForm.newPassword" type="password" show-password placeholder="不少于 6 位"/>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <el-button @click="pwdVisible = false">取消</el-button>
+            <el-button type="primary" @click="changePwd">确定</el-button>
+        </template>
+    </el-dialog>
+</div>
+
+<script src="lib/vue.global.prod.js"></script>
+<script src="lib/element-plus.full.min.js"></script>
+<script src="lib/zh-cn.min.js"></script>
+<script src="lib/axios.min.js"></script>
+<script src="lib/echarts.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/admin-basic.js"></script>
+<script src="js/admin-biz.js"></script>
+<script src="js/role-pages.js"></script>
+<script src="js/boot.js"></script>
+<script>
+    // 背景视频兜底：确保静音、循环、可自动播放；失败时保留渐变背景
+    (function () {
+        var v = document.querySelector('.login-hero-video');
+        if (!v) return;
+        v.muted = true;
+        v.defaultMuted = true;
+        v.setAttribute('muted', '');
+        var play = function () {
+            var p = v.play();
+            if (p && p.catch) p.catch(function () { v.style.display = 'none'; });
+        };
+        if (document.readyState === 'complete') play();
+        else window.addEventListener('load', play, { once: true });
+    })();
+</script>
+</body>
+</html>
